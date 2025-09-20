@@ -11,20 +11,28 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:logs_mobile_app/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('LogsApp displays welcome text', (WidgetTester tester) async {
     await tester.pumpWidget(const LogsApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(find.text('Welcome to Logs App!'), findsOneWidget);
+    expect(find.byType(Center), findsOneWidget);
+    expect(find.byType(Scaffold), findsOneWidget);
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  testWidgets('LogsApp uses indigo as primary color',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const LogsApp());
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    final MaterialApp app = tester.widget(find.byType(MaterialApp));
+    final ThemeData theme = app.theme!;
+    expect(theme.primaryColor, Colors.indigo);
+  });
+
+  testWidgets('LogsApp does not show debug banner',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const LogsApp());
+
+    final MaterialApp app = tester.widget(find.byType(MaterialApp));
+    expect(app.debugShowCheckedModeBanner, isFalse);
   });
 }

@@ -12,7 +12,7 @@ class LogsApp extends StatelessWidget {
     return MaterialApp(
       title: 'Logs App',
       theme: ThemeData(
-        primarySwatch: Colors.indigo,
+        primaryColor: Colors.indigo,
       ),
       home: const Scaffold(
         body: Center(
