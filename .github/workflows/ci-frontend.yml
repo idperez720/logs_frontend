@@ -1,0 +1,93 @@
+name: Logs Flutter Frontend CI
+
+on:
+  push:
+    branches:
+      - main
+      - development
+      - 'feature/**'
+      - 'feat/**'
+      - 'bugfix/**'
+      - 'hotfix/**'
+      - 'release/**'
+  pull_request:
+    branches:
+      - main
+      - development
+
+jobs:
+  lint-and-format:
+    name: Code Quality & Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      
+      - name: Install dependencies
+        run: flutter pub get
+      
+      - name: Analyze code (flutter analyze)
+        run: flutter analyze
+
+      - name: Run formatter check
+        run: flutter format --set-exit-if-changed .
+
+  tests:
+    name: Run Tests and Build
+    runs-on: macos-latest
+    needs: lint-and-format
+    if: |
+      github.ref == 'refs/heads/main' || 
+      github.ref == 'refs/heads/development' || 
+      startsWith(github.ref, 'refs/pull/')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      
+      - name: Install dependencies
+        run: flutter pub get
+      
+      - name: Run Flutter tests
+        run: flutter test --coverage
+
+      - name: Build iOS Simulator Debug Build
+        if: github.event_name == 'pull_request'
+        run: flutter build ios --debug --simulator --no-codesign
+        
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage/lcov.info
+
+  notify-results:
+    name: Results Summary
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, tests]
+    if: always()
+    steps:
+      - name: Output results
+        run: |
+          echo "Linting result: ${{ needs.lint-and-format.result }}"
+          echo "Tests result: ${{ needs.tests.result }}"
+      
+      - name: Success message
+        if: needs.lint-and-format.result == 'success' && needs.tests.result == 'success'
+        run: echo "✅ All checks passed. Ready for merge or deployment."
+      
+      - name: Failure message
+        if: needs.lint-and-format.result == 'failure' || needs.tests.result == 'failure'
+        run: |
+          echo "❌ Some checks failed. Please review the logs."
+          exit 1

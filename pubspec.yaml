@@ -1,0 +1,40 @@
+name: logs_mobile_app
+description: Logs mobile app frontend for personal logging and journaling.
+
+publish_to: 'none' # Private project
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Networking
+  dio: ^5.0.0
+
+  # State management (Phase 1: Provider)
+  provider: ^6.0.5
+
+  # Local storage
+  shared_preferences: ^2.1.1
+
+  # JSON serialization runtime annotations
+  json_annotation: ^4.8.0
+
+  # Navigation
+  go_router: ^16.2.2
+
+  # AWS Amplify (updated to latest stable)
+  amplify_flutter: ^2.6.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code generation tools
+  build_runner: ^2.4.4
+  json_serializable: ^6.5.4
+
+  # Optional: Linting
+  flutter_lints: ^6.0.0
