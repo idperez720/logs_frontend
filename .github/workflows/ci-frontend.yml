@@ -63,13 +63,6 @@ jobs:
       - name: Build iOS Simulator Debug Build
         if: github.event_name == 'pull_request'
         run: flutter build ios --debug --simulator --no-codesign
-        
-      - name: Upload coverage report
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-report
-          path: coverage/lcov.info
 
   notify-results:
     name: Results Summary
