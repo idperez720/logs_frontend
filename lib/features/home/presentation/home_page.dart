@@ -18,7 +18,7 @@ import '../../tags/data/tags_providers.dart';
 import '../state/home_controller.dart';
 import 'widgets/fab_menu.dart';
 
-import 'home_sheets.dart'; // showSendSheet, showHistorySheet, showTagPicker
+import 'widgets/home_sheets.dart'; // showSendSheet, showHistorySheet, showTagPicker
 
 class HomePage extends ConsumerStatefulWidget {
   final UserResponse user;
