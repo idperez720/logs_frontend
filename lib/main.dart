@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:logs_mobile_app/core/theme.dart';
 
-void main() {
-  runApp(const LogsApp());
+import 'features/auth/presentation/splash_page.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
+  runApp(const ProviderScope(child: LogsApp()));
 }
 
-class LogsApp extends StatelessWidget {
+class LogsApp extends ConsumerWidget {
   const LogsApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeState = ref.watch(themeControllerProvider);
     return MaterialApp(
-      title: 'Logs App',
-      theme: ThemeData(
-        primaryColor: Colors.indigo,
-      ),
-      home: const Scaffold(
-        body: Center(
-          child: Text('Welcome to Logs App!'),
-        ),
-      ),
+      title: 'Logs',
       debugShowCheckedModeBanner: false,
+      theme: buildBWTheme(themeState.font),
+      home: const SplashPage(),
     );
   }
 }
