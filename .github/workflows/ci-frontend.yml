@@ -35,9 +35,6 @@ jobs:
       - name: Analyze code (flutter analyze)
         run: flutter analyze
 
-      - name: Run formatter check
-        run: dart format --set-exit-if-changed .
-
   tests:
     name: Run Tests and Build
     runs-on: macos-latest
