@@ -118,14 +118,14 @@ class _ComposerState extends State<Composer>
         fontSize: widget.fontSize,
         height: widget.lineHeight,
         // Using generic monospace family name when requested (best-effort across platforms)
-        fontFamily: widget.monospace ? 'monospace' : null,
+        fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
         // Slightly darker than default for a “ink on paper” feel
         color: Colors.black87,
       );
 
   @override
   Widget build(BuildContext context) {
-    final paperColor = const Color(0xFFFCFBF7); // warm off-white
+    final paperColor = const Color(0xFFFFFFFF); // warm off-white
     final borderColor = const Color(0xFF111111);
 
     return DecoratedBox(
