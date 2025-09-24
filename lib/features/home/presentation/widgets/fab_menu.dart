@@ -26,6 +26,7 @@ class FabMenu extends StatelessWidget {
           child: open
               ? Column(
                   key: const ValueKey('menu'),
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     _MiniFab(
                         label: 'History',
@@ -75,14 +76,15 @@ class _MiniFab extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              decoration: const BoxDecoration(color: Colors.white),
+              decoration: const BoxDecoration(color: Colors.transparent),
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
               margin: const EdgeInsets.only(right: 8),
-              child: Text(label, style: const TextStyle(color: Colors.black)),
+              child: Text(label,
+                  style: const TextStyle(color: Colors.black, fontSize: 16)),
             ),
             Container(
-              width: 44,
-              height: 44,
+              width: 54,
+              height: 54,
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
