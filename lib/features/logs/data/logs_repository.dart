@@ -36,14 +36,42 @@ class LogsRepository {
   final Dio _dio = ApiClient.I.dio;
 
   Future<Map<String, dynamic>> createLog(LogCreateRequest req) async {
-    final res = await _dio.post('/api/v1/logs/', data: req.toJson());
-    return res.data as Map<String, dynamic>;
+    try {
+      final res = await _dio.post('/api/v1/logs/', data: req.toJson());
+      return res.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      throw _messageFromDioError(e);
+    }
   }
 
   Future<List<Map<String, dynamic>>> recent({int limit = 10}) async {
-    final res = await _dio
-        .get('/api/v1/logs/recent', queryParameters: {'limit': limit});
-    final data = (res.data as List).cast<Map<String, dynamic>>();
-    return data;
+    try {
+      final res = await _dio
+          .get('/api/v1/logs/recent', queryParameters: {'limit': limit});
+      final data = (res.data as List).cast<Map<String, dynamic>>();
+      return data;
+    } on DioException catch (e) {
+      throw _messageFromDioError(e);
+    }
+  }
+
+  String _messageFromDioError(DioException e) {
+    try {
+      final data = e.response?.data;
+      if (data is Map && data['message'] is String) {
+        return data['message'] as String;
+      }
+      if (data is Map && data['detail'] is String) {
+        return data['detail'] as String;
+      }
+      if (data is Map && data['detail'] is List && data['detail'].isNotEmpty) {
+        final first = data['detail'].first;
+        if (first is Map && first['msg'] is String) {
+          return first['msg'] as String;
+        }
+      }
+      if (e.message != null && e.message!.isNotEmpty) return e.message!;
+    } catch (_) {}
+    return 'Request failed';
   }
 }
