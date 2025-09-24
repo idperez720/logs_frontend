@@ -25,6 +25,16 @@ class AuthRepository {
     return UserResponse.fromJson(res.data);
   }
 
+  Future<UserResponse> updateMe(UpdateCurrentUserRequest req) async {
+    final res = await _dio.put('/api/v1/auth/me', data: req.toJson());
+    return UserResponse.fromJson(res.data);
+  }
+
+  Future<void> deleteMe() async {
+    await _dio.delete('/api/v1/auth/me');
+    await JwtStorage.clear();
+  }
+
   Future<void> logout() async {
     try {
       await _dio.post('/api/v1/auth/logout');

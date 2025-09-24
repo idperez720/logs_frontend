@@ -64,11 +64,16 @@ class AuthController extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> signup(String email, String password, {String? phone}) async {
+  Future<void> signup(
+    String email,
+    String name,
+    String password, {
+    String? phone,
+  }) async {
     try {
       state = const AuthLoading();
       final auth = await _repo.signup(UserSignupRequest(
-          email: email, password: password, phoneNumber: phone));
+          email: email, name: name, password: password, phoneNumber: phone));
       if (auth.user.status == UserStatus.EMAIL_VERIFICATION) {
         state = AuthNeedsEmailVerification(auth.user.email);
       } else {
@@ -102,5 +107,37 @@ class AuthController extends StateNotifier<AuthState> {
   Future<void> logout() async {
     await _repo.logout();
     state = const Unauthenticated();
+  }
+
+  Future<void> deleteAccount() async {
+    try {
+      state = const AuthLoading();
+      await _repo.deleteMe();
+      state = const Unauthenticated();
+    } catch (e) {
+      state = Unauthenticated(e.toString());
+    }
+  }
+
+  Future<void> updateProfile({
+    String? name,
+    String? email,
+    String? phoneNumber,
+    String? password,
+  }) async {
+    try {
+      state = const AuthLoading();
+      final updatedUser = await _repo.updateMe(
+        UpdateCurrentUserRequest(
+          name: name,
+          email: email,
+          phoneNumber: phoneNumber,
+          password: password,
+        ),
+      );
+      state = Authenticated(updatedUser);
+    } catch (e) {
+      state = Unauthenticated(e.toString());
+    }
   }
 }

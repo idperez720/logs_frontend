@@ -332,6 +332,7 @@ class _HistorySheet extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text('Recent logs',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),

@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logs_mobile_app/features/auth/state/auth_controller.dart';
 import '../../../shared/widgets/bw_button.dart';
 import '../../../shared/widgets/bw_text_field.dart';
+import '../../../shared/validators.dart';
 import 'splash_page.dart';
 
 class SignupPage extends ConsumerStatefulWidget {
@@ -14,7 +15,10 @@ class SignupPage extends ConsumerStatefulWidget {
 }
 
 class _SignupPageState extends ConsumerState<SignupPage> {
+  final _formKey = GlobalKey<FormState>();
+
   final emailC = TextEditingController();
+  final nameC = TextEditingController();
   final passC = TextEditingController();
   final phoneC = TextEditingController();
 
@@ -23,6 +27,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   @override
   void dispose() {
     emailC.dispose();
+    nameC.dispose();
     passC.dispose();
     phoneC.dispose();
     super.dispose();
@@ -59,40 +64,63 @@ class _SignupPageState extends ConsumerState<SignupPage> {
             constraints: const BoxConstraints(maxWidth: 420),
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  BWTextField(
-                    controller: emailC,
-                    label: 'Email',
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 16),
-                  BWTextField(
-                    controller: passC,
-                    label: 'Password',
-                    obscure: true,
-                  ),
-                  const SizedBox(height: 16),
-                  BWTextField(
-                    controller: phoneC,
-                    label: 'Phone (optional)',
-                    keyboardType: TextInputType.phone,
-                  ),
-                  const SizedBox(height: 24),
-                  BWButton(
-                    label: 'Sign up',
-                    loading: loading,
-                    onPressed: () =>
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    BWTextField(
+                      controller: emailC,
+                      label: 'Email',
+                      keyboardType: TextInputType.emailAddress,
+                      validatorType: ValidatorType.email,
+                    ),
+                    const SizedBox(height: 16),
+                    BWTextField(
+                      controller: nameC,
+                      label: 'Name',
+                      // Keep no validation to maintain original behavior/design.
+                      // If you want it required, add a simple validator here.
+                    ),
+                    const SizedBox(height: 16),
+                    BWTextField(
+                      controller: passC,
+                      label: 'Password',
+                      obscure: true,
+                      validatorType: ValidatorType.password,
+                    ),
+                    const SizedBox(height: 16),
+                    BWTextField(
+                      controller: phoneC,
+                      label: 'Phone (optional)',
+                      keyboardType: TextInputType.phone,
+                      // Allow empty = valid; otherwise use phone validator.
+                      validator: (v) {
+                        final t = v?.trim() ?? '';
+                        if (t.isEmpty) return null;
+                        return Validators.phoneValidator(t);
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    BWButton(
+                      label: 'Sign up',
+                      loading: loading,
+                      onPressed: () {
+                        final ok = _formKey.currentState?.validate() ?? false;
+                        if (!ok) return;
+
                         ref.read(authControllerProvider.notifier).signup(
                               emailC.text.trim(),
+                              nameC.text.trim(),
                               passC.text,
-                              phone: phoneC.text.isEmpty
+                              phone: phoneC.text.trim().isEmpty
                                   ? null
                                   : phoneC.text.trim(),
-                            ),
-                  ),
-                ],
+                            );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

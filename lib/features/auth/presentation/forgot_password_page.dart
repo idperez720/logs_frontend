@@ -6,9 +6,11 @@ import 'package:logs_mobile_app/features/auth/data/auth_models.dart';
 import 'package:logs_mobile_app/features/auth/state/auth_controller.dart';
 import 'package:logs_mobile_app/shared/widgets/bw_button.dart';
 import 'package:logs_mobile_app/shared/widgets/bw_text_field.dart';
+import 'package:logs_mobile_app/features/auth/presentation/login_page.dart';
 
 class ForgotPasswordPage extends ConsumerStatefulWidget {
-  const ForgotPasswordPage({super.key});
+  final bool fromChangePassword;
+  const ForgotPasswordPage({super.key, this.fromChangePassword = false});
   @override
   ConsumerState<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
@@ -17,6 +19,15 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   final emailC = TextEditingController();
   final codeC = TextEditingController();
   final passC = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final state = ref.read(authControllerProvider);
+    if (state is Authenticated) {
+      emailC.text = state.user.email;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,15 +54,32 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                         child: BWButton(
                           label: 'Send code',
                           loading: loading,
-                          onPressed: () async {
-                            await ref
-                                .read(authRepositoryProvider)
-                                .forgotPassword(
-                                    PasswordResetRequest(emailC.text.trim()));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text('Reset code sent')));
-                          },
+                          onPressed: widget.fromChangePassword
+                              ? () {}
+                              : () {
+                                  final email = emailC.text.trim();
+                                  () async {
+                                    try {
+                                      await ref
+                                          .read(authRepositoryProvider)
+                                          .forgotPassword(
+                                            PasswordResetRequest(email),
+                                          );
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content: Text('Reset code sent')),
+                                      );
+                                    } catch (e) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                'Failed to send code: $e')),
+                                      );
+                                    }
+                                  }();
+                                },
                         ),
                       ),
                     ],
@@ -66,14 +94,29 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                     label: 'Update password',
                     loading: loading,
                     onPressed: () async {
-                      await ref
-                          .read(authRepositoryProvider)
-                          .resetPassword(PasswordResetConfirm(
-                            email: emailC.text.trim(),
-                            resetCode: codeC.text.trim(),
-                            newPassword: passC.text,
-                          ));
-                      if (mounted) Navigator.pop(context);
+                      final email = emailC.text.trim();
+                      final code = codeC.text.trim();
+                      final newPass = passC.text;
+                      try {
+                        await ref.read(authRepositoryProvider).resetPassword(
+                              PasswordResetConfirm(
+                                  email: email,
+                                  resetCode: code,
+                                  newPassword: newPass),
+                            );
+                        if (!mounted) return;
+                        // After reset, go to LoginPage
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const LoginPage()),
+                          (_) => false,
+                        );
+                      } catch (e) {
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text('Failed to reset password: $e')),
+                        );
+                      }
                     },
                   ),
                 ],
